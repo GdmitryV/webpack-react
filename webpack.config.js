@@ -1,7 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
-const { EsbuildPlugin } = require('esbuild-loader')
+const {EsbuildPlugin} = require('esbuild-loader')
 
 module.exports = {
     mode: "development",
@@ -22,7 +22,16 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
+                use: [
+                    'style-loader',
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 1,
+                            modules: true,
+                        }
+                    }
+                ],
             },
             {
                 test: /\.(png|svg|jpg?g|gif)$/i,
@@ -41,6 +50,13 @@ module.exports = {
             },
         ]
     },
+    devServer: {
+        static: path.resolve(__dirname, "./dist"),
+        compress: true,
+        port: 8080,
+        open: true,
+    },
+    devtool: "inline-source-map",
     optimization: {
         minimizer: [
             new EsbuildPlugin({
