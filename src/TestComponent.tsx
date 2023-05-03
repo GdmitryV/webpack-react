@@ -1,4 +1,5 @@
 import React, {FC} from 'react';
+import styles from './TestComponent.module.css';
 
 interface Props {
     text: string
@@ -7,7 +8,7 @@ interface Props {
 const TestComponent:FC<Props> = ({text}) => {
     return (
         <div>
-            <p>{text}</p>
+            <p className={styles.text}>{text}</p>
         </div>
     );
 };

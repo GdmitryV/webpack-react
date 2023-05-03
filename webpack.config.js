@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
+const {EsbuildPlugin} = require('esbuild-loader')
 
 module.exports = {
     mode: "development",
@@ -21,7 +22,16 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
+                use: [
+                    'style-loader',
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 1,
+                            modules: true,
+                        }
+                    }
+                ],
             },
             {
                 test: /\.(png|svg|jpg?g|gif)$/i,
@@ -32,33 +42,35 @@ module.exports = {
                 type: 'asset/resource',
             },
             {
-                test: /\.(js)x?$/i,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
-                    },
+                test: /\.[jt]sx?$/,
+                loader: 'esbuild-loader',
+                options: {
+                    target: 'es2015'
                 }
             },
-            {
-                test: /\.(ts)x?$/i,
-                exclude: /node_modules/,
-                use: "ts-loader"
-            }
         ]
     },
+    devServer: {
+        static: path.resolve(__dirname, "./dist"),
+        compress: true,
+        port: 8080,
+        open: true,
+    },
+    devtool: "inline-source-map",
     optimization: {
         minimizer: [
-            "...",
+            new EsbuildPlugin({
+                target: 'es2015',
+                css: true,
+            }),
             new ImageMinimizerPlugin({
                 minimizer: {
                     implementation: ImageMinimizerPlugin.imageminMinify,
                     options: {
                         plugins: [
-                            ["gifsicle", { interlaced: true }],
-                            ["jpegtran", { progressive: true }],
-                            ["optipng", { optimizationLevel: 5 }],
+                            ["gifsicle", {interlaced: true}],
+                            ["jpegtran", {progressive: true}],
+                            ["optipng", {optimizationLevel: 5}],
                             [
                                 "svgo",
                                 {
@@ -71,7 +83,7 @@ module.exports = {
                                                     addAttributesToSVGElement: {
                                                         params: {
                                                             attributes: [
-                                                                { xmlns: "http://www.w3.org/2000/svg" },
+                                                                {xmlns: "http://www.w3.org/2000/svg"},
                                                             ],
                                                         },
                                                     },
